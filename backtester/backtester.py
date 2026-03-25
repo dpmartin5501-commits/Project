@@ -126,7 +126,9 @@ class Backtester:
 
         if position_open and current_trade:
             last_row = df.iloc[-1]
-            current_trade.close(last_row["timestamp"], last_row["close"])
+            adj_price = last_row["close"] * (1 - self.slippage_pct)
+            commission = adj_price * self.commission_pct
+            current_trade.close(last_row["timestamp"], adj_price - commission)
             capital += current_trade.pnl
             trades.append(current_trade)
             equity[-1] = capital
