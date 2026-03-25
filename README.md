@@ -28,6 +28,7 @@ Backtester searches the internet for cryptocurrency trading strategies focused o
 | Williams %R Reversal | Mean Reversion | Williams %R(14) |
 | Parabolic SAR Trend | Trend Following | PSAR |
 | Ichimoku Cloud Breakout | Trend Following | Ichimoku |
+| VWAP Reversion | Mean Reversion | VWAP, ATR |
 
 ## Installation
 
@@ -141,7 +142,7 @@ backtester/
   strategies/
     __init__.py
     base.py             # Base strategy class and trade model
-    implementations.py  # 11 concrete strategy implementations
+    implementations.py  # 12 concrete strategy implementations
 ```
 
 ## Requirements
