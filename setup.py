@@ -14,6 +14,7 @@ setup(
         "rich>=13.0.0",
         "click>=8.1.0",
         "aiohttp>=3.9.0",
+        "flask>=3.0.0",
     ],
     entry_points={
         "console_scripts": [

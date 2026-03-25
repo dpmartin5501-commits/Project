@@ -24,6 +24,8 @@ from .engine import BacktesterEngine, EngineConfig
 @click.option("--evolve-population", default=20, help="Population size per generation for evolution.")
 @click.option("--evolve-generations", default=10, help="Number of generations for evolution.")
 @click.option("--evolve-mutation-rate", default=0.3, help="Mutation rate for evolution (0.0-1.0).")
+@click.option("--gui", is_flag=True, help="Launch the web GUI instead of the terminal interface.")
+@click.option("--port", default=5000, help="Port for the web GUI server (only with --gui).")
 def main(
     exchange: str,
     symbols: str,
@@ -41,13 +43,23 @@ def main(
     evolve_population: int,
     evolve_generations: int,
     evolve_mutation_rate: float,
+    gui: bool,
+    port: int,
 ) -> None:
     """BACKTESTER - Search the internet for crypto trading strategies with low drawdown and high win rates.
 
     Searches for strategies online, backtests them against historical crypto data,
     ranks results by win rate, drawdown, Sharpe ratio, and more. Optionally evolves
     strategy parameters using a genetic algorithm to find optimal variations.
+
+    Use --gui to launch the pixel-art RPG themed web interface.
     """
+    if gui:
+        from .web import run_gui
+        click.echo(f"Starting Backtester Quest GUI on http://0.0.0.0:{port}")
+        run_gui(port=port)
+        return
+
     symbol_list = [s.strip() for s in symbols.split(",")]
 
     config = EngineConfig(
