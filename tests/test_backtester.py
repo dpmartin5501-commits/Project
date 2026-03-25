@@ -21,6 +21,13 @@ from backtester.strategies.implementations import (
     WilliamsRReversal,
     get_all_strategies,
 )
+from backtester.evolver import (
+    EvolverConfig,
+    EvolutionResult,
+    StrategyEvolver,
+    _compute_fitness,
+    _snap_to_step,
+)
 from backtester.strategy_search import StrategyResult, StrategySearcher
 
 
@@ -299,3 +306,125 @@ class TestStrategySearcher:
     def test_relevance_check(self):
         assert StrategySearcher._is_strategy_relevant("Trading Strategy Guide", "entry and exit signals")
         assert not StrategySearcher._is_strategy_relevant("Cat Videos", "funny compilation")
+
+
+class TestEvolver:
+    def test_snap_to_step_int(self):
+        assert _snap_to_step(17, 5, 30, 1) == 17
+        assert _snap_to_step(3, 5, 30, 1) == 5
+        assert _snap_to_step(35, 5, 30, 1) == 30
+
+    def test_snap_to_step_float(self):
+        result = _snap_to_step(1.37, 1.0, 3.5, 0.25)
+        assert result == 1.25 or result == 1.5
+
+    def test_compute_fitness_few_trades(self):
+        r = BacktestResult(strategy_name="test", symbol="X", timeframe="1d")
+        r.total_trades = 1
+        assert _compute_fitness(r, min_trades=3) == 0.0
+
+    def test_compute_fitness_good_result(self):
+        r = BacktestResult(strategy_name="test", symbol="X", timeframe="1d")
+        r.total_trades = 20
+        r.win_rate = 65.0
+        r.max_drawdown_pct = 10.0
+        r.sharpe_ratio = 1.5
+        r.profit_factor = 2.0
+        r.total_return_pct = 30.0
+        score = _compute_fitness(r)
+        assert score > 0.5
+
+    def test_compute_fitness_bad_result(self):
+        r = BacktestResult(strategy_name="test", symbol="X", timeframe="1d")
+        r.total_trades = 20
+        r.win_rate = 20.0
+        r.max_drawdown_pct = 45.0
+        r.sharpe_ratio = -1.0
+        r.profit_factor = 0.3
+        r.total_return_pct = -30.0
+        score = _compute_fitness(r)
+        assert score < 0.3
+
+    def test_all_strategies_have_param_ranges(self):
+        from backtester.strategies.implementations import STRATEGY_REGISTRY
+        for key, cls in STRATEGY_REGISTRY.items():
+            ranges = cls.param_ranges()
+            assert isinstance(ranges, dict), f"{key} param_ranges() must return dict"
+            assert len(ranges) > 0, f"{key} should have at least one tunable param"
+            for name, (lo, hi, step) in ranges.items():
+                assert lo < hi, f"{key}.{name}: lo ({lo}) must be < hi ({hi})"
+                assert step > 0, f"{key}.{name}: step must be positive"
+
+    def test_evolver_creates_population(self, sample_df):
+        from backtester.strategies.implementations import STRATEGY_REGISTRY
+        config = EvolverConfig(population_size=5, generations=1, seed=42)
+        evolver = StrategyEvolver(config)
+
+        cls = STRATEGY_REGISTRY["rsi_mean_reversion"]
+        pop = evolver._init_population("rsi_mean_reversion", cls, cls.param_ranges())
+        assert len(pop) == 5
+        default_params = RSIMeanReversion().config.params
+        assert pop[0].params == default_params
+
+    def test_evolver_single_strategy(self, sample_df):
+        config = EvolverConfig(population_size=6, generations=3, seed=42)
+        evolver = StrategyEvolver(config)
+
+        result = evolver.evolve_strategy(
+            "rsi_mean_reversion",
+            {"BTC/USD": sample_df},
+        )
+        assert result is not None
+        assert isinstance(result, EvolutionResult)
+        assert result.strategy_name == "rsi_mean_reversion"
+        assert result.generations_run == 3
+        assert len(result.fitness_history) == 3
+        assert result.evolved_params is not None
+        assert result.evolved_result is not None
+        assert result.evolved_result.total_trades >= 0
+
+    def test_evolver_respects_constraints(self):
+        config = EvolverConfig(population_size=10, generations=1, seed=42)
+        evolver = StrategyEvolver(config)
+        from backtester.strategies.implementations import STRATEGY_REGISTRY
+        cls = STRATEGY_REGISTRY["ema_crossover"]
+        pop = evolver._init_population("ema_crossover", cls, cls.param_ranges())
+        for ind in pop:
+            assert ind.params["fast_period"] < ind.params["slow_period"], (
+                f"fast_period ({ind.params['fast_period']}) must be < "
+                f"slow_period ({ind.params['slow_period']})"
+            )
+
+    def test_evolver_unknown_strategy(self):
+        evolver = StrategyEvolver()
+        result = evolver.evolve_strategy("nonexistent", {})
+        assert result is None
+
+    def test_evolver_evolve_all(self, sample_df):
+        config = EvolverConfig(population_size=4, generations=2, seed=42)
+        evolver = StrategyEvolver(config)
+
+        results = evolver.evolve_all({"BTC/USD": sample_df})
+        assert len(results) > 0
+        for r in results:
+            assert isinstance(r, EvolutionResult)
+            assert r.evolved_params is not None
+
+    def test_crossover_produces_valid_params(self):
+        evolver = StrategyEvolver(EvolverConfig(seed=42))
+        a = {"rsi_period": 14, "oversold": 30, "overbought": 70}
+        b = {"rsi_period": 20, "oversold": 25, "overbought": 75}
+        child = evolver._crossover(a, b)
+        for key in a:
+            assert child[key] in (a[key], b[key])
+
+    def test_mutation_stays_in_range(self):
+        evolver = StrategyEvolver(EvolverConfig(seed=42))
+        ranges = RSIMeanReversion.param_ranges()
+        params = {"rsi_period": 14, "oversold": 30, "overbought": 70}
+        for _ in range(50):
+            mutated = evolver._mutate(dict(params), ranges)
+            for key, (lo, hi, _) in ranges.items():
+                assert lo <= mutated[key] <= hi, (
+                    f"{key}={mutated[key]} outside [{lo}, {hi}]"
+                )

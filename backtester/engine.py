@@ -1,11 +1,12 @@
-"""Main Backtester engine that orchestrates search, backtest, and ranking."""
+"""Main Backtester engine that orchestrates search, backtest, ranking, and evolution."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from .backtester import BacktestResult, Backtester
 from .data_fetcher import DataFetcher, FetchConfig
+from .evolver import EvolverConfig, EvolutionResult, StrategyEvolver
 from .ranker import FilterConfig, StrategyRanker
 from .reporter import Reporter
 from .strategies.implementations import get_all_strategies
@@ -26,6 +27,10 @@ class EngineConfig:
     search_internet: bool = True
     top_n: int = 5
     verbose: bool = True
+    evolve: bool = False
+    evolve_population: int = 20
+    evolve_generations: int = 10
+    evolve_mutation_rate: float = 0.3
 
     def __post_init__(self):
         if self.symbols is None:
@@ -33,14 +38,15 @@ class EngineConfig:
 
 
 class BacktesterEngine:
-    """End-to-end engine: search strategies online, backtest them, rank by drawdown/win rate."""
+    """End-to-end engine: search strategies online, backtest them, rank by drawdown/win rate,
+    and optionally evolve parameter variations to find the best version of each strategy."""
 
     def __init__(self, config: EngineConfig | None = None):
         self.config = config or EngineConfig()
         self.reporter = Reporter()
 
     def run(self) -> list[BacktestResult]:
-        """Execute the full pipeline: search -> fetch data -> backtest -> rank -> report."""
+        """Execute the full pipeline: search -> fetch data -> backtest -> rank -> evolve -> report."""
         console = self.reporter.console
 
         console.rule("[bold cyan]BACKTESTER - Crypto Strategy Search Engine[/bold cyan]")
@@ -50,6 +56,9 @@ class BacktesterEngine:
         console.print(f"[dim]Timeframe: {self.config.timeframe}[/dim]")
         console.print(f"[dim]History: {self.config.since_days} days[/dim]")
         console.print(f"[dim]Capital: ${self.config.initial_capital:,.0f}[/dim]")
+        if self.config.evolve:
+            console.print(f"[dim]Evolution: {self.config.evolve_generations} generations, "
+                          f"population {self.config.evolve_population}[/dim]")
         console.print()
 
         # --- Phase 1: Search for strategies ---
@@ -87,10 +96,23 @@ class BacktesterEngine:
             self.reporter.print_top_strategies(best, self.config.top_n)
             top_results = best
 
+        # --- Phase 6: Evolve (optional) ---
+        evo_results: list[EvolutionResult] = []
+        if self.config.evolve:
+            console.rule("[bold]Phase 6: Evolving Strategy Parameters[/bold]")
+            evo_results = self._evolve_strategies(market_data)
+            self.reporter.print_evolution_results(evo_results)
+            self.reporter.print_evolution_detail(evo_results, self.config.top_n)
+
+        total_evolved = len(evo_results)
+        total_improved = sum(1 for r in evo_results if r.improved)
+
         self.reporter.print_summary(
             total_searched=len(searched_strategies),
             total_backtested=len(all_results),
             total_passed=len(top_results),
+            total_evolved=total_evolved,
+            total_improved=total_improved,
         )
 
         return top_results
@@ -157,3 +179,30 @@ class BacktesterEngine:
             f"(WR >= {self.config.min_win_rate}%, DD <= {self.config.max_drawdown}%)[/cyan]"
         )
         return filtered
+
+    def _evolve_strategies(self, data) -> list[EvolutionResult]:
+        console = self.reporter.console
+        evo_config = EvolverConfig(
+            population_size=self.config.evolve_population,
+            generations=self.config.evolve_generations,
+            mutation_rate=self.config.evolve_mutation_rate,
+        )
+        evolver = StrategyEvolver(evo_config)
+
+        def on_progress(name: str, current: int, total: int):
+            console.print(
+                f"  [cyan]Evolving[/cyan] {name} "
+                f"[dim]({current}/{total})[/dim]"
+            )
+
+        results = evolver.evolve_all(
+            data,
+            initial_capital=self.config.initial_capital,
+            commission_pct=self.config.commission_pct,
+            on_progress=on_progress,
+        )
+        improved = sum(1 for r in results if r.improved)
+        console.print(
+            f"[green]Evolution complete: {improved}/{len(results)} strategies improved[/green]"
+        )
+        return results

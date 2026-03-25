@@ -20,6 +20,10 @@ from .engine import BacktesterEngine, EngineConfig
 @click.option("--top", "-n", default=5, help="Number of top strategies to display.")
 @click.option("--no-search", is_flag=True, help="Skip internet search, use only built-in strategies.")
 @click.option("--quiet", "-q", is_flag=True, help="Reduce output verbosity.")
+@click.option("--evolve", is_flag=True, help="Evolve strategy parameters using a genetic algorithm.")
+@click.option("--evolve-population", default=20, help="Population size per generation for evolution.")
+@click.option("--evolve-generations", default=10, help="Number of generations for evolution.")
+@click.option("--evolve-mutation-rate", default=0.3, help="Mutation rate for evolution (0.0-1.0).")
 def main(
     exchange: str,
     symbols: str,
@@ -33,11 +37,16 @@ def main(
     top: int,
     no_search: bool,
     quiet: bool,
+    evolve: bool,
+    evolve_population: int,
+    evolve_generations: int,
+    evolve_mutation_rate: float,
 ) -> None:
     """BACKTESTER - Search the internet for crypto trading strategies with low drawdown and high win rates.
 
     Searches for strategies online, backtests them against historical crypto data,
-    and ranks results by win rate, drawdown, Sharpe ratio, and more.
+    ranks results by win rate, drawdown, Sharpe ratio, and more. Optionally evolves
+    strategy parameters using a genetic algorithm to find optimal variations.
     """
     symbol_list = [s.strip() for s in symbols.split(",")]
 
@@ -54,6 +63,10 @@ def main(
         search_internet=not no_search,
         top_n=top,
         verbose=not quiet,
+        evolve=evolve,
+        evolve_population=evolve_population,
+        evolve_generations=evolve_generations,
+        evolve_mutation_rate=evolve_mutation_rate,
     )
 
     engine = BacktesterEngine(config)

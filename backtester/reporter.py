@@ -8,6 +8,7 @@ from rich.table import Table
 from rich.text import Text
 
 from .backtester import BacktestResult
+from .evolver import EvolutionResult
 from .strategy_search import StrategyResult
 
 
@@ -131,8 +132,108 @@ class Reporter:
                 )
             )
 
-    def print_summary(self, total_searched: int, total_backtested: int, total_passed: int) -> None:
-        """Print a summary of the search and backtest pipeline."""
+    def print_evolution_results(self, evo_results: list[EvolutionResult]) -> None:
+        """Display evolution results showing original vs evolved parameters and metrics."""
+        if not evo_results:
+            self.console.print("[yellow]No evolution results to display.[/yellow]")
+            return
+
+        table = Table(
+            title="Strategy Evolution Results",
+            show_lines=True,
+            title_style="bold magenta",
+        )
+        table.add_column("#", style="dim", width=3)
+        table.add_column("Strategy", style="bold white", max_width=25)
+        table.add_column("Orig WR", justify="center", width=9)
+        table.add_column("Evol WR", justify="center", width=9)
+        table.add_column("Orig DD", justify="center", width=9)
+        table.add_column("Evol DD", justify="center", width=9)
+        table.add_column("Orig Ret", justify="center", width=9)
+        table.add_column("Evol Ret", justify="center", width=9)
+        table.add_column("Improved", justify="center", width=9)
+
+        for i, r in enumerate(evo_results, 1):
+            orig = r.original_result
+            evol = r.evolved_result
+            o_wr = f"{orig.win_rate:.1f}%" if orig else "-"
+            e_wr = f"{evol.win_rate:.1f}%" if evol else "-"
+            o_dd = f"{orig.max_drawdown_pct:.1f}%" if orig else "-"
+            e_dd = f"{evol.max_drawdown_pct:.1f}%" if evol else "-"
+            o_ret = f"{orig.total_return_pct:.1f}%" if orig else "-"
+            e_ret = f"{evol.total_return_pct:.1f}%" if evol else "-"
+            imp = "[green]YES[/green]" if r.improved else "[red]NO[/red]"
+
+            table.add_row(str(i), r.strategy_name, o_wr, e_wr, o_dd, e_dd, o_ret, e_ret, imp)
+
+        self.console.print()
+        self.console.print(table)
+
+    def print_evolution_detail(self, evo_results: list[EvolutionResult], top_n: int = 5) -> None:
+        """Show detailed panels for top evolved strategies."""
+        improved = [r for r in evo_results if r.improved]
+        to_show = improved[:top_n] if improved else evo_results[:top_n]
+
+        self.console.print()
+        label = "Improved" if improved else "Best Evolved"
+        self.console.print(f"[bold magenta]Top {min(top_n, len(to_show))} {label} Strategies[/bold magenta]")
+        self.console.print()
+
+        for i, r in enumerate(to_show, 1):
+            panel_text = Text()
+            panel_text.append("--- Original Parameters ---\n", style="dim")
+            for k, v in r.original_params.items():
+                panel_text.append(f"  {k}: {v}\n")
+            panel_text.append("\n")
+
+            panel_text.append("--- Evolved Parameters ---\n", style="bold cyan")
+            for k, v in r.evolved_params.items():
+                orig_v = r.original_params.get(k)
+                changed = orig_v != v
+                style = "bold green" if changed else ""
+                marker = " *" if changed else ""
+                panel_text.append(f"  {k}: {v}{marker}\n", style=style)
+            panel_text.append("\n")
+
+            if r.original_result and r.evolved_result:
+                o = r.original_result
+                e = r.evolved_result
+
+                def _delta(label, orig_val, evol_val, fmt=".1f", lower_better=False):
+                    delta = evol_val - orig_val
+                    if lower_better:
+                        better = delta < 0
+                    else:
+                        better = delta > 0
+                    arrow = "+" if delta > 0 else ""
+                    color = "green" if better else ("red" if not better and delta != 0 else "")
+                    panel_text.append(f"  {label}: {orig_val:{fmt}} -> {evol_val:{fmt}}", style="")
+                    panel_text.append(f" ({arrow}{delta:{fmt}})\n", style=color)
+
+                panel_text.append("--- Performance Comparison ---\n", style="dim")
+                _delta("Win Rate %", o.win_rate, e.win_rate)
+                _delta("Max Drawdown %", o.max_drawdown_pct, e.max_drawdown_pct, lower_better=True)
+                _delta("Return %", o.total_return_pct, e.total_return_pct)
+                _delta("Sharpe", o.sharpe_ratio, e.sharpe_ratio, fmt=".2f")
+                _delta("Profit Factor", o.profit_factor if o.profit_factor < 1e6 else 0,
+                       e.profit_factor if e.profit_factor < 1e6 else 0, fmt=".2f")
+                _delta("Trades", o.total_trades, e.total_trades, fmt="d")
+
+            panel_text.append(f"\n  Generations: {r.generations_run}")
+            if r.fitness_history:
+                panel_text.append(f" | Best fitness: {r.fitness_history[-1]:.4f}")
+
+            border = "green" if r.improved else "yellow"
+            self.console.print(Panel(
+                panel_text,
+                title=f"#{i} {r.strategy_name}",
+                border_style=border,
+                width=65,
+            ))
+
+    def print_summary(self, total_searched: int, total_backtested: int, total_passed: int,
+                      total_evolved: int = 0, total_improved: int = 0) -> None:
+        """Print a summary of the search, backtest, and evolution pipeline."""
         self.console.print()
         summary = Table(title="Pipeline Summary", title_style="bold magenta", show_lines=True)
         summary.add_column("Metric", style="bold")
@@ -140,4 +241,7 @@ class Reporter:
         summary.add_row("Strategies Found (Search)", str(total_searched))
         summary.add_row("Strategies Backtested", str(total_backtested))
         summary.add_row("Strategies Passing Filters", str(total_passed))
+        if total_evolved > 0:
+            summary.add_row("Strategies Evolved", str(total_evolved))
+            summary.add_row("Strategies Improved", str(total_improved))
         self.console.print(summary)

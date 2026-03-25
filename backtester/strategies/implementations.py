@@ -20,6 +20,14 @@ class RSIMeanReversion(BaseStrategy):
         )
         super().__init__(config)
 
+    @classmethod
+    def param_ranges(cls) -> dict[str, tuple]:
+        return {
+            "rsi_period": (5, 30, 1),
+            "oversold": (15, 40, 1),
+            "overbought": (60, 85, 1),
+        }
+
     def prepare_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
         p = self.config.params
         df = df.copy()
@@ -44,6 +52,13 @@ class EMACrossover(BaseStrategy):
             **kwargs,
         )
         super().__init__(config)
+
+    @classmethod
+    def param_ranges(cls) -> dict[str, tuple]:
+        return {
+            "fast_period": (3, 20, 1),
+            "slow_period": (10, 60, 1),
+        }
 
     def prepare_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
         p = self.config.params
@@ -71,6 +86,14 @@ class BollingerBandSqueeze(BaseStrategy):
             **kwargs,
         )
         super().__init__(config)
+
+    @classmethod
+    def param_ranges(cls) -> dict[str, tuple]:
+        return {
+            "bb_period": (10, 40, 1),
+            "bb_std": (1.0, 3.5, 0.25),
+            "squeeze_lookback": (40, 200, 10),
+        }
 
     def prepare_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
         p = self.config.params
@@ -104,6 +127,15 @@ class MACDHistogramReversal(BaseStrategy):
             **kwargs,
         )
         super().__init__(config)
+
+    @classmethod
+    def param_ranges(cls) -> dict[str, tuple]:
+        return {
+            "fast": (6, 20, 1),
+            "slow": (18, 40, 1),
+            "signal": (5, 15, 1),
+            "trend_period": (20, 100, 5),
+        }
 
     def prepare_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
         p = self.config.params
@@ -143,6 +175,15 @@ class StochasticRSIBounce(BaseStrategy):
         )
         super().__init__(config)
 
+    @classmethod
+    def param_ranges(cls) -> dict[str, tuple]:
+        return {
+            "rsi_period": (7, 28, 1),
+            "stoch_period": (7, 28, 1),
+            "k_smooth": (2, 7, 1),
+            "d_smooth": (2, 7, 1),
+        }
+
     def prepare_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
         p = self.config.params
         df = df.copy()
@@ -175,6 +216,14 @@ class TripleEMATrend(BaseStrategy):
         )
         super().__init__(config)
 
+    @classmethod
+    def param_ranges(cls) -> dict[str, tuple]:
+        return {
+            "fast": (3, 15, 1),
+            "medium": (12, 35, 1),
+            "slow": (30, 100, 5),
+        }
+
     def prepare_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
         p = self.config.params
         df = df.copy()
@@ -203,6 +252,13 @@ class ADXRSITrend(BaseStrategy):
             **kwargs,
         )
         super().__init__(config)
+
+    @classmethod
+    def param_ranges(cls) -> dict[str, tuple]:
+        return {
+            "adx_period": (7, 28, 1),
+            "rsi_period": (7, 28, 1),
+        }
 
     def prepare_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
         p = self.config.params
@@ -236,6 +292,12 @@ class DualMomentum(BaseStrategy):
         )
         super().__init__(config)
 
+    @classmethod
+    def param_ranges(cls) -> dict[str, tuple]:
+        return {
+            "roc_period": (5, 30, 1),
+        }
+
     def prepare_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
         p = self.config.params
         df = df.copy()
@@ -263,6 +325,12 @@ class WilliamsRReversal(BaseStrategy):
         )
         super().__init__(config)
 
+    @classmethod
+    def param_ranges(cls) -> dict[str, tuple]:
+        return {
+            "period": (5, 30, 1),
+        }
+
     def prepare_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
         p = self.config.params
         df = df.copy()
@@ -288,6 +356,13 @@ class ParabolicSARTrend(BaseStrategy):
             **kwargs,
         )
         super().__init__(config)
+
+    @classmethod
+    def param_ranges(cls) -> dict[str, tuple]:
+        return {
+            "step": (0.005, 0.05, 0.005),
+            "max_step": (0.1, 0.4, 0.025),
+        }
 
     def prepare_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
         p = self.config.params
@@ -317,6 +392,14 @@ class IchimokuBreakout(BaseStrategy):
             **kwargs,
         )
         super().__init__(config)
+
+    @classmethod
+    def param_ranges(cls) -> dict[str, tuple]:
+        return {
+            "tenkan": (5, 20, 1),
+            "kijun": (15, 40, 1),
+            "senkou_b": (30, 80, 2),
+        }
 
     def prepare_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
         p = self.config.params
