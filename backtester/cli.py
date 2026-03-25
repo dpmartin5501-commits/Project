@@ -1,10 +1,10 @@
-"""Command-line interface for the Backrest crypto strategy search engine."""
+"""Command-line interface for the Backtester crypto strategy search engine."""
 
 from __future__ import annotations
 
 import click
 
-from .engine import BackrestEngine, EngineConfig
+from .engine import BacktesterEngine, EngineConfig
 
 
 @click.command()
@@ -34,7 +34,7 @@ def main(
     no_search: bool,
     quiet: bool,
 ) -> None:
-    """BACKREST - Search the internet for crypto trading strategies with low drawdown and high win rates.
+    """BACKTESTER - Search the internet for crypto trading strategies with low drawdown and high win rates.
 
     Searches for strategies online, backtests them against historical crypto data,
     and ranks results by win rate, drawdown, Sharpe ratio, and more.
@@ -56,7 +56,7 @@ def main(
         verbose=not quiet,
     )
 
-    engine = BackrestEngine(config)
+    engine = BacktesterEngine(config)
     engine.run()
 
 

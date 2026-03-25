@@ -1,13 +1,13 @@
-"""Tests for the backrest crypto strategy search and backtesting engine."""
+"""Tests for the backtester crypto strategy search and backtesting engine."""
 
 import numpy as np
 import pandas as pd
 import pytest
 
-from backrest.backtester import BacktestResult, Backtester
-from backrest.ranker import FilterConfig, RankCriteria, StrategyRanker
-from backrest.strategies.base import BaseStrategy, Signal, StrategyConfig, Trade
-from backrest.strategies.implementations import (
+from backtester.backtester import BacktestResult, Backtester
+from backtester.ranker import FilterConfig, RankCriteria, StrategyRanker
+from backtester.strategies.base import BaseStrategy, Signal, StrategyConfig, Trade
+from backtester.strategies.implementations import (
     ADXRSITrend,
     BollingerBandSqueeze,
     DualMomentum,
@@ -21,7 +21,7 @@ from backrest.strategies.implementations import (
     WilliamsRReversal,
     get_all_strategies,
 )
-from backrest.strategy_search import StrategyResult, StrategySearcher
+from backtester.strategy_search import StrategyResult, StrategySearcher
 
 
 @pytest.fixture

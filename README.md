@@ -1,6 +1,6 @@
-# Backrest - Crypto Trading Strategy Search & Backtesting Engine
+# Backtester - Crypto Trading Strategy Search & Backtesting Engine
 
-Backrest searches the internet for cryptocurrency trading strategies focused on **low drawdown** and **high win rates**, then backtests them against real historical market data to validate their performance.
+Backtester searches the internet for cryptocurrency trading strategies focused on **low drawdown** and **high win rates**, then backtests them against real historical market data to validate their performance.
 
 ## Features
 
@@ -39,13 +39,13 @@ pip install -r requirements.txt
 ### Quick Start
 
 ```bash
-python -m backrest
+python -m backtester
 ```
 
 ### CLI Options
 
 ```bash
-python -m backrest \
+python -m backtester \
   --exchange binanceus \
   --symbols "BTC/USD,ETH/USD,SOL/USD" \
   --timeframe 1d \
@@ -76,7 +76,7 @@ python -m backrest \
 ### Python API
 
 ```python
-from backrest.engine import BackrestEngine, EngineConfig
+from backtester.engine import BacktesterEngine, EngineConfig
 
 config = EngineConfig(
     symbols=["BTC/USD", "ETH/USD"],
@@ -84,7 +84,7 @@ config = EngineConfig(
     min_win_rate=55,
     max_drawdown=20,
 )
-engine = BackrestEngine(config)
+engine = BacktesterEngine(config)
 top_strategies = engine.run()
 
 for result in top_strategies:
@@ -113,9 +113,9 @@ for result in top_strategies:
 ## Project Structure
 
 ```
-backrest/
+backtester/
   __init__.py           # Package metadata
-  __main__.py           # python -m backrest entry point
+  __main__.py           # python -m backtester entry point
   cli.py                # Click CLI interface
   engine.py             # Main orchestration engine
   data_fetcher.py       # OHLCV data download via ccxt

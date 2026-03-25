@@ -1,4 +1,4 @@
-"""Main Backrest engine that orchestrates search, backtest, and ranking."""
+"""Main Backtester engine that orchestrates search, backtest, and ranking."""
 
 from __future__ import annotations
 
@@ -32,7 +32,7 @@ class EngineConfig:
             self.symbols = ["BTC/USD", "ETH/USD", "SOL/USD"]
 
 
-class BackrestEngine:
+class BacktesterEngine:
     """End-to-end engine: search strategies online, backtest them, rank by drawdown/win rate."""
 
     def __init__(self, config: EngineConfig | None = None):
@@ -43,7 +43,7 @@ class BackrestEngine:
         """Execute the full pipeline: search -> fetch data -> backtest -> rank -> report."""
         console = self.reporter.console
 
-        console.rule("[bold cyan]BACKREST - Crypto Strategy Search Engine[/bold cyan]")
+        console.rule("[bold cyan]BACKTESTER - Crypto Strategy Search Engine[/bold cyan]")
         console.print()
         console.print(f"[dim]Exchange: {self.config.exchange}[/dim]")
         console.print(f"[dim]Symbols: {', '.join(self.config.symbols)}[/dim]")

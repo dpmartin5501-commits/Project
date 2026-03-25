@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="backrest",
+    name="backtester",
     version="1.0.0",
     packages=find_packages(),
     install_requires=[
@@ -17,7 +17,7 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "backrest=backrest.cli:main",
+            "backtester=backtester.cli:main",
         ],
     },
     python_requires=">=3.10",
