@@ -71,6 +71,15 @@ class BaseStrategy(ABC):
         """Compute technical indicators needed by the strategy. Override in subclass."""
         return df
 
+    @classmethod
+    def param_ranges(cls) -> dict[str, tuple]:
+        """Return (min, max, step) for each tunable parameter.
+
+        Override in subclasses. The evolver uses these ranges to generate
+        mutations and constrain the search space.
+        """
+        return {}
+
     @property
     def name(self) -> str:
         return self.config.name
