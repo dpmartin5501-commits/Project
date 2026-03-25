@@ -9,6 +9,24 @@ import pandas as pd
 
 from .strategies.base import BaseStrategy, Signal, Trade
 
+TIMEFRAME_TO_ANNUAL_FACTOR: dict[str, int] = {
+    "1m": 525600,
+    "3m": 175200,
+    "5m": 105120,
+    "15m": 35040,
+    "30m": 17520,
+    "1h": 8760,
+    "2h": 4380,
+    "4h": 2190,
+    "6h": 1460,
+    "8h": 1095,
+    "12h": 730,
+    "1d": 252,
+    "3d": 84,
+    "1w": 52,
+    "1M": 12,
+}
+
 
 @dataclass
 class BacktestResult:
@@ -42,10 +60,12 @@ class BacktestResult:
 class Backtester:
     """Event-driven backtester that simulates strategy execution on historical data."""
 
-    def __init__(self, initial_capital: float = 10000.0, commission_pct: float = 0.001, slippage_pct: float = 0.0005):
+    def __init__(self, initial_capital: float = 10000.0, commission_pct: float = 0.001,
+                 slippage_pct: float = 0.0005, timeframe: str = "1d"):
         self.initial_capital = initial_capital
         self.commission_pct = commission_pct
         self.slippage_pct = slippage_pct
+        self.timeframe = timeframe
 
     def run(self, strategy: BaseStrategy, df: pd.DataFrame, symbol: str = "UNKNOWN") -> BacktestResult:
         """Run a single strategy against a price DataFrame."""
@@ -134,7 +154,10 @@ class Backtester:
             equity[-1] = capital
 
         equity_series = pd.Series(equity, index=df["timestamp"])
-        result = self._compute_metrics(strategy.name, symbol, trades, equity_series, self.initial_capital, capital)
+        result = self._compute_metrics(
+            strategy.name, symbol, self.timeframe, trades,
+            equity_series, self.initial_capital, capital,
+        )
         return result
 
     def run_multiple(
@@ -152,6 +175,7 @@ class Backtester:
         self,
         strategy_name: str,
         symbol: str,
+        timeframe: str,
         trades: list[Trade],
         equity_curve: pd.Series,
         initial_capital: float,
@@ -160,7 +184,7 @@ class Backtester:
         result = BacktestResult(
             strategy_name=strategy_name,
             symbol=symbol,
-            timeframe="1d",
+            timeframe=timeframe,
             trades=trades,
             equity_curve=equity_curve,
             initial_capital=initial_capital,
@@ -208,12 +232,13 @@ class Backtester:
 
         if len(equity_curve) > 1:
             returns = equity_curve.pct_change().dropna()
+            annual_factor = TIMEFRAME_TO_ANNUAL_FACTOR.get(timeframe, 252)
             if len(returns) > 1 and returns.std() > 0:
-                result.sharpe_ratio = (returns.mean() / returns.std()) * np.sqrt(252)
+                result.sharpe_ratio = (returns.mean() / returns.std()) * np.sqrt(annual_factor)
 
                 downside = returns[returns < 0]
                 if len(downside) > 0 and downside.std() > 0:
-                    result.sortino_ratio = (returns.mean() / downside.std()) * np.sqrt(252)
+                    result.sortino_ratio = (returns.mean() / downside.std()) * np.sqrt(annual_factor)
 
         if result.max_drawdown_pct > 0:
             result.calmar_ratio = result.annualized_return_pct / result.max_drawdown_pct

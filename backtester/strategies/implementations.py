@@ -426,6 +426,61 @@ class IchimokuBreakout(BaseStrategy):
         return signals
 
 
+class VWAPReversion(BaseStrategy):
+    """Mean-reversion strategy: buy when price drops below VWAP by a threshold, sell at VWAP.
+
+    Uses a rolling VWAP approximation (typical price * volume / cumulative volume)
+    since true intraday VWAP resets each session. An ATR-based stop loss limits
+    downside risk.
+    """
+
+    def __init__(self, vwap_period: int = 20, entry_deviation: float = 2.0,
+                 atr_period: int = 14, atr_stop_mult: float = 2.0, **kwargs):
+        config = StrategyConfig(
+            name="VWAP Reversion",
+            params={
+                "vwap_period": vwap_period,
+                "entry_deviation": entry_deviation,
+                "atr_period": atr_period,
+                "atr_stop_mult": atr_stop_mult,
+            },
+            **kwargs,
+        )
+        super().__init__(config)
+
+    @classmethod
+    def param_ranges(cls) -> dict[str, tuple]:
+        return {
+            "vwap_period": (10, 40, 1),
+            "entry_deviation": (1.0, 4.0, 0.25),
+            "atr_period": (7, 28, 1),
+            "atr_stop_mult": (1.0, 4.0, 0.25),
+        }
+
+    def prepare_indicators(self, df: pd.DataFrame) -> pd.DataFrame:
+        p = self.config.params
+        df = df.copy()
+        typical_price = (df["high"] + df["low"] + df["close"]) / 3
+        tp_vol = typical_price * df["volume"]
+        period = p["vwap_period"]
+        df["vwap"] = tp_vol.rolling(window=period).sum() / df["volume"].rolling(window=period).sum()
+        df["vwap_pct"] = (df["close"] - df["vwap"]) / df["vwap"] * 100
+        df["atr"] = ta.volatility.AverageTrueRange(
+            df["high"], df["low"], df["close"], window=p["atr_period"]
+        ).average_true_range()
+        return df
+
+    def generate_signals(self, df: pd.DataFrame) -> pd.Series:
+        p = self.config.params
+        signals = pd.Series(Signal.HOLD, index=df.index)
+        below_vwap = df["vwap_pct"] < -p["entry_deviation"]
+        above_vwap = df["close"] >= df["vwap"]
+        stop_hit = df["close"] < (df["vwap"] - p["atr_stop_mult"] * df["atr"])
+        signals[below_vwap] = Signal.BUY
+        signals[above_vwap | stop_hit] = Signal.SELL
+        return signals
+
+
 STRATEGY_REGISTRY: dict[str, type[BaseStrategy]] = {
     "rsi_mean_reversion": RSIMeanReversion,
     "ema_crossover": EMACrossover,
@@ -438,6 +493,7 @@ STRATEGY_REGISTRY: dict[str, type[BaseStrategy]] = {
     "williams_r": WilliamsRReversal,
     "parabolic_sar": ParabolicSARTrend,
     "ichimoku_breakout": IchimokuBreakout,
+    "vwap_reversion": VWAPReversion,
 }
 
 

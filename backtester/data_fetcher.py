@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import logging
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
 import ccxt
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -73,5 +76,5 @@ class DataFetcher:
             try:
                 results[symbol] = self.fetch_ohlcv(symbol)
             except Exception as e:
-                print(f"Warning: Failed to fetch {symbol}: {e}")
+                logger.warning("Failed to fetch %s: %s", symbol, e)
         return results

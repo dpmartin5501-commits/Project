@@ -22,7 +22,7 @@ See `README.md` for full CLI options.
 python3 -m pytest tests/ -v
 ```
 
-All 44 tests use synthetic data and require no external services or API keys.
+All 48 tests use synthetic data and require no external services or API keys.
 
 ### Linting
 

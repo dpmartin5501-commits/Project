@@ -18,6 +18,7 @@ from backtester.strategies.implementations import (
     RSIMeanReversion,
     StochasticRSIBounce,
     TripleEMATrend,
+    VWAPReversion,
     WilliamsRReversal,
     get_all_strategies,
 )
@@ -91,7 +92,7 @@ class TestTrade:
 class TestStrategies:
     def test_all_strategies_instantiate(self):
         strategies = get_all_strategies()
-        assert len(strategies) == 11
+        assert len(strategies) == 12
         for s in strategies:
             assert isinstance(s, BaseStrategy)
             assert s.name
@@ -164,6 +165,14 @@ class TestStrategies:
         signals = s.generate_signals(df)
         assert len(signals) == len(df)
 
+    def test_vwap_reversion_generates_signals(self, sample_df):
+        s = VWAPReversion()
+        df = s.prepare_indicators(sample_df.copy())
+        signals = s.generate_signals(df)
+        assert len(signals) == len(df)
+        unique_signals = set(signals.dropna().unique())
+        assert unique_signals.issubset({Signal.BUY, Signal.SELL, Signal.HOLD})
+
 
 class TestBacktester:
     def test_backtest_produces_result(self, sample_df):
@@ -203,6 +212,27 @@ class TestBacktester:
         data = {"BTC/USDT": sample_df}
         results = bt.run_multiple(strategies, data)
         assert len(results) == 2
+
+    def test_backtest_timeframe_propagation(self, sample_df):
+        bt = Backtester(timeframe="4h")
+        s = RSIMeanReversion()
+        result = bt.run(s, sample_df, "BTC/USDT")
+        assert result.timeframe == "4h"
+
+    def test_backtest_default_timeframe(self, sample_df):
+        bt = Backtester()
+        s = RSIMeanReversion()
+        result = bt.run(s, sample_df, "BTC/USDT")
+        assert result.timeframe == "1d"
+
+    def test_backtest_vwap_strategy(self, sample_df):
+        bt = Backtester()
+        s = VWAPReversion()
+        result = bt.run(s, sample_df, "BTC/USDT")
+        assert isinstance(result, BacktestResult)
+        assert result.strategy_name == "VWAP Reversion"
+        assert 0 <= result.win_rate <= 100
+        assert result.max_drawdown_pct >= 0
 
 
 class TestRanker:

@@ -139,6 +139,7 @@ class StrategyEvolver:
         data: dict[str, pd.DataFrame],
         initial_capital: float = 10000.0,
         commission_pct: float = 0.001,
+        timeframe: str = "1d",
     ) -> EvolutionResult | None:
         """Evolve a single strategy's parameters against the given data."""
         if strategy_key not in STRATEGY_REGISTRY:
@@ -152,7 +153,7 @@ class StrategyEvolver:
         original = strategy_class(initial_capital=initial_capital, commission_pct=commission_pct)
         original_params = dict(original.config.params)
 
-        bt = Backtester(initial_capital=initial_capital, commission_pct=commission_pct)
+        bt = Backtester(initial_capital=initial_capital, commission_pct=commission_pct, timeframe=timeframe)
         original_result = self._evaluate_across_symbols(bt, strategy_class, original_params, data)
 
         population = self._init_population(strategy_key, strategy_class, ranges)
@@ -227,6 +228,7 @@ class StrategyEvolver:
         data: dict[str, pd.DataFrame],
         initial_capital: float = 10000.0,
         commission_pct: float = 0.001,
+        timeframe: str = "1d",
         on_progress: callable | None = None,
     ) -> list[EvolutionResult]:
         """Evolve all registered strategies."""
@@ -236,7 +238,7 @@ class StrategyEvolver:
         for i, key in enumerate(keys):
             if on_progress:
                 on_progress(key, i + 1, len(keys))
-            evo_result = self.evolve_strategy(key, data, initial_capital, commission_pct)
+            evo_result = self.evolve_strategy(key, data, initial_capital, commission_pct, timeframe)
             if evo_result is not None:
                 results.append(evo_result)
 
