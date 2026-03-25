@@ -8,8 +8,8 @@ from .engine import BackrestEngine, EngineConfig
 
 
 @click.command()
-@click.option("--exchange", "-e", default="binance", help="Exchange to fetch data from (ccxt-supported).")
-@click.option("--symbols", "-s", default="BTC/USDT,ETH/USDT,SOL/USDT", help="Comma-separated trading pairs.")
+@click.option("--exchange", "-e", default="binanceus", help="Exchange to fetch data from (ccxt-supported).")
+@click.option("--symbols", "-s", default="BTC/USD,ETH/USD,SOL/USD", help="Comma-separated trading pairs.")
 @click.option("--timeframe", "-t", default="1d", help="Candlestick timeframe (1m, 5m, 1h, 4h, 1d).")
 @click.option("--days", "-d", default=365, help="Number of days of history to fetch.")
 @click.option("--capital", "-c", default=10000.0, help="Initial capital for backtesting.")

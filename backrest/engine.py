@@ -14,7 +14,7 @@ from .strategy_search import StrategySearcher
 
 @dataclass
 class EngineConfig:
-    exchange: str = "binance"
+    exchange: str = "binanceus"
     symbols: list[str] | None = None
     timeframe: str = "1d"
     since_days: int = 365
@@ -29,7 +29,7 @@ class EngineConfig:
 
     def __post_init__(self):
         if self.symbols is None:
-            self.symbols = ["BTC/USDT", "ETH/USDT", "SOL/USDT"]
+            self.symbols = ["BTC/USD", "ETH/USD", "SOL/USD"]
 
 
 class BackrestEngine:

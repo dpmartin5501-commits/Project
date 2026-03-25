@@ -12,7 +12,7 @@ import pandas as pd
 
 @dataclass
 class FetchConfig:
-    exchange_id: str = "binance"
+    exchange_id: str = "binanceus"
     symbols: list[str] | None = None
     timeframe: str = "1d"
     since_days: int = 365
@@ -20,7 +20,7 @@ class FetchConfig:
 
     def __post_init__(self):
         if self.symbols is None:
-            self.symbols = ["BTC/USDT", "ETH/USDT", "SOL/USDT"]
+            self.symbols = ["BTC/USD", "ETH/USD", "SOL/USD"]
 
 
 class DataFetcher:

@@ -46,8 +46,8 @@ python -m backrest
 
 ```bash
 python -m backrest \
-  --exchange binance \
-  --symbols "BTC/USDT,ETH/USDT,SOL/USDT" \
+  --exchange binanceus \
+  --symbols "BTC/USD,ETH/USD,SOL/USD" \
   --timeframe 1d \
   --days 365 \
   --capital 10000 \
@@ -60,8 +60,8 @@ python -m backrest \
 
 | Option | Default | Description |
 |--------|---------|-------------|
-| `--exchange, -e` | `binance` | Exchange to fetch data from |
-| `--symbols, -s` | `BTC/USDT,ETH/USDT,SOL/USDT` | Comma-separated trading pairs |
+| `--exchange, -e` | `binanceus` | Exchange to fetch data from |
+| `--symbols, -s` | `BTC/USD,ETH/USD,SOL/USD` | Comma-separated trading pairs |
 | `--timeframe, -t` | `1d` | Candlestick timeframe |
 | `--days, -d` | `365` | Days of historical data |
 | `--capital, -c` | `10000` | Starting capital ($) |
@@ -79,7 +79,7 @@ python -m backrest \
 from backrest.engine import BackrestEngine, EngineConfig
 
 config = EngineConfig(
-    symbols=["BTC/USDT", "ETH/USDT"],
+    symbols=["BTC/USD", "ETH/USD"],
     since_days=180,
     min_win_rate=55,
     max_drawdown=20,
