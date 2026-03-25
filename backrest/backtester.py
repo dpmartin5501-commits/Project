@@ -77,7 +77,7 @@ class Backtester:
                         adj_price = stop_price * (1 - self.slippage_pct)
                         commission = adj_price * self.commission_pct
                         current_trade.close(row["timestamp"], adj_price - commission)
-                        capital += current_trade.pnl * current_trade.size
+                        capital += current_trade.pnl
                         trades.append(current_trade)
                         position_open = False
                         current_trade = None
@@ -90,7 +90,7 @@ class Backtester:
                         adj_price = tp_price * (1 - self.slippage_pct)
                         commission = adj_price * self.commission_pct
                         current_trade.close(row["timestamp"], adj_price - commission)
-                        capital += current_trade.pnl * current_trade.size
+                        capital += current_trade.pnl
                         trades.append(current_trade)
                         position_open = False
                         current_trade = None
@@ -113,7 +113,7 @@ class Backtester:
                 adj_price = price * (1 - self.slippage_pct)
                 commission = adj_price * self.commission_pct
                 current_trade.close(row["timestamp"], adj_price - commission)
-                capital += current_trade.pnl * current_trade.size
+                capital += current_trade.pnl
                 trades.append(current_trade)
                 position_open = False
                 current_trade = None
@@ -127,7 +127,7 @@ class Backtester:
         if position_open and current_trade:
             last_row = df.iloc[-1]
             current_trade.close(last_row["timestamp"], last_row["close"])
-            capital += current_trade.pnl * current_trade.size
+            capital += current_trade.pnl
             trades.append(current_trade)
             equity[-1] = capital
 
