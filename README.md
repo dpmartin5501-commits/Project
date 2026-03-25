@@ -6,8 +6,9 @@ Backtester searches the internet for cryptocurrency trading strategies focused o
 
 - **Internet Strategy Search** - Scrapes the web for crypto trading strategies using DuckDuckGo and curated finance sites
 - **12 Built-in Strategies** - Pre-configured implementations of popular technical analysis strategies
-- **Historical Data Fetching** - Downloads OHLCV candlestick data from any ccxt-supported exchange (Binance, Coinbase, etc.)
+- **Historical Data Fetching** - Downloads OHLCV candlestick data from any ccxt-supported exchange (Binance US, Kraken, etc.)
 - **Full Backtesting Engine** - Event-driven backtester with commission, slippage, stop-loss, and take-profit support
+- **Strategy Evolution** - Genetic algorithm that optimizes strategy parameters (population, crossover, mutation) to find the best variation of each strategy
 - **Comprehensive Metrics** - Win rate, max drawdown, Sharpe ratio, Sortino ratio, Calmar ratio, profit factor, expectancy
 - **Smart Ranking** - Composite scoring that prioritizes low drawdown and high win rates
 - **Rich Terminal Output** - Color-coded tables and detailed strategy panels
@@ -56,6 +57,14 @@ python -m backtester \
   --top 5
 ```
 
+### Evolve Strategy Parameters
+
+```bash
+python -m backtester --evolve --evolve-generations 15 --evolve-population 30
+```
+
+This runs a genetic algorithm on each strategy, testing hundreds of parameter combinations to find the version with the lowest drawdown and highest win rate.
+
 ### All Options
 
 | Option | Default | Description |
@@ -72,6 +81,10 @@ python -m backtester \
 | `--top, -n` | `5` | Top N strategies to show |
 | `--no-search` | `false` | Skip internet search |
 | `--quiet, -q` | `false` | Less verbose output |
+| `--evolve` | `false` | Evolve strategy parameters via genetic algorithm |
+| `--evolve-population` | `20` | Population size per generation |
+| `--evolve-generations` | `10` | Number of generations |
+| `--evolve-mutation-rate` | `0.3` | Mutation probability (0.0-1.0) |
 
 ### Python API
 
@@ -98,7 +111,8 @@ for result in top_strategies:
 3. **Backtest** - Runs all strategies against the data with realistic execution simulation
 4. **Filter** - Removes strategies that don't meet win rate / drawdown thresholds
 5. **Rank** - Scores remaining strategies using a composite metric
-6. **Report** - Displays results in rich terminal tables
+6. **Evolve** (optional) - Genetic algorithm optimizes each strategy's parameters across generations
+7. **Report** - Displays results in rich terminal tables
 
 ## Metrics
 
@@ -121,6 +135,7 @@ backtester/
   data_fetcher.py       # OHLCV data download via ccxt
   strategy_search.py    # Internet strategy scraper
   backtester.py         # Backtesting engine + metrics
+  evolver.py            # Genetic algorithm strategy evolution
   ranker.py             # Strategy filtering and ranking
   reporter.py           # Rich terminal output
   strategies/
