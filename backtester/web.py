@@ -275,7 +275,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
   --accent-cyan: #22d3ee;
   --accent-orange: #fb923c;
   --text-primary: #e2e8f0;
-  --text-dim: #94a3b8;
+  --text-dim: #a8b8cc;
   --border-color: #334155;
   --pixel-border: #e6c75d;
 }
@@ -589,9 +589,11 @@ canvas#starfield {
   padding: 10px;
   max-height: 160px;
   overflow-y: auto;
-  font-size: 7px;
+  font-size: 8px;
   color: var(--text-dim);
   line-height: 2;
+  mask-image: linear-gradient(transparent, #000 12px, #000 calc(100% - 12px), transparent);
+  -webkit-mask-image: linear-gradient(transparent, #000 12px, #000 calc(100% - 12px), transparent);
 }
 
 .quest-log .log-entry {
@@ -650,7 +652,7 @@ canvas#starfield {
 }
 
 .victory-stat .lbl {
-  font-size: 6px;
+  font-size: 7px;
   color: var(--text-dim);
   margin-top: 2px;
 }
@@ -833,7 +835,7 @@ canvas#starfield {
 }
 
 .stat-label {
-  font-size: 6px;
+  font-size: 7px;
   color: var(--text-dim);
   text-transform: uppercase;
   margin-bottom: 4px;
@@ -841,7 +843,7 @@ canvas#starfield {
 }
 
 .stat-value {
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .evo-card {
@@ -1071,12 +1073,173 @@ canvas#starfield {
   background: #000;
   color: var(--text-primary);
   padding: 4px 8px;
-  font-size: 6px;
+  font-size: 7px;
   white-space: nowrap;
   z-index: 10;
   border: 1px solid var(--accent-gold);
   pointer-events: none;
 }
+
+/* Rank medals */
+.rank-medal { font-size: 16px; margin-right: 4px; }
+
+/* Staggered card entrance */
+@keyframes cardSlideIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.top-card { animation: cardSlideIn 0.35s ease-out both; }
+.top-card:nth-child(1) { animation-delay: 0s; }
+.top-card:nth-child(2) { animation-delay: 0.08s; }
+.top-card:nth-child(3) { animation-delay: 0.16s; }
+.top-card:nth-child(4) { animation-delay: 0.24s; }
+.top-card:nth-child(5) { animation-delay: 0.32s; }
+
+/* Tab transition */
+.tab-content > div { transition: opacity 0.2s; }
+
+/* Scroll-to-top button */
+.scroll-top-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 40px;
+  height: 40px;
+  background: var(--accent-gold);
+  color: var(--bg-dark);
+  border: 3px solid #f5e08a;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 14px;
+  cursor: pointer;
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.4);
+  transition: transform 0.1s;
+}
+.scroll-top-btn:hover { transform: translateY(-2px); }
+
+/* Result filter toolbar */
+.filter-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.filter-toolbar select, .filter-toolbar button {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  padding: 5px 8px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+}
+.filter-toolbar select:focus { border-color: var(--accent-gold); outline: none; }
+.filter-toolbar button {
+  background: var(--accent-gold);
+  color: var(--bg-dark);
+  border: 2px solid #f5e08a;
+}
+.filter-toolbar button:hover { background: #f5e08a; }
+.filter-toolbar .filter-label {
+  font-size: 7px;
+  color: var(--text-dim);
+}
+
+/* Detail modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.15s;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal-box {
+  background: var(--bg-medium);
+  border: 3px solid var(--accent-gold);
+  box-shadow: 8px 8px 0 rgba(0,0,0,0.5);
+  max-width: 680px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 20px;
+  position: relative;
+}
+.modal-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 12px;
+  color: var(--accent-red);
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+.modal-close:hover { color: #fff; }
+.modal-title {
+  font-size: 11px;
+  color: var(--accent-gold);
+  margin-bottom: 14px;
+}
+.modal-section {
+  margin-bottom: 14px;
+}
+.modal-section h4 {
+  font-size: 8px;
+  color: var(--accent-cyan);
+  margin-bottom: 8px;
+}
+.modal-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.modal-stat {
+  background: var(--bg-dark);
+  padding: 8px;
+  border: 1px solid var(--border-color);
+}
+.modal-stat .ms-label { font-size: 7px; color: var(--text-dim); margin-bottom: 3px; }
+.modal-stat .ms-value { font-size: 10px; }
+
+/* Confetti canvas */
+canvas#confetti {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 150;
+  pointer-events: none;
+}
+
+/* Cancel button */
+.btn-cancel {
+  background: transparent;
+  color: var(--accent-red);
+  border: 2px solid var(--accent-red);
+  padding: 8px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 7px;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 4px;
+  transition: all 0.1s;
+}
+.btn-cancel:hover { background: rgba(239,68,68,0.15); }
+
+/* Zero value dimming */
+.zero-val { color: #4a5568 !important; }
+
+/* Accessible +/- prefix */
+.val-prefix { font-size: 8px; margin-right: 1px; }
 </style>
 </head>
 <body>
@@ -1204,9 +1367,10 @@ canvas#starfield {
         <label for="search_internet">&#x1F310; Search Internet for Strategies</label>
       </div>
 
-      <button class="btn btn-quest" id="runBtn" onclick="startQuest()">
+      <button class="btn btn-quest" id="runBtn" onclick="startQuest()" aria-label="Start backtesting quest">
         &#x2694;&#xFE0F; BEGIN QUEST &#x2694;&#xFE0F;
       </button>
+      <button class="btn-cancel" id="cancelBtn" style="display:none;" onclick="cancelQuest()">&#x2716; ABORT QUEST</button>
 
       <div id="phaseStepper" style="display:none;" class="phase-stepper">
         <div class="phase-step" data-phase="searching">Scout</div>
@@ -1256,6 +1420,10 @@ canvas#starfield {
     </div>
   </div>
 </div>
+
+<div class="scroll-top-btn" id="scrollTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Scroll to top">&#x25B2;</div>
+<div id="modalContainer"></div>
+<canvas id="confetti" style="display:none;"></canvas>
 
 <script>
 // Starfield background
@@ -1385,8 +1553,91 @@ document.getElementById('evolve').addEventListener('change', function() {
   }
 });
 
+// Scroll-to-top button visibility
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('scrollTopBtn');
+  btn.style.display = window.scrollY > 300 ? 'flex' : 'none';
+});
+
+// Form persistence via localStorage
+function saveFormState() {
+  const fields = ['exchange','symbols','timeframe','days','capital','commission','min_win_rate','max_drawdown','min_trades','top_n'];
+  const state = {};
+  fields.forEach(f => { const el = document.getElementById(f); if (el) state[f] = el.value; });
+  state.search_internet = document.getElementById('search_internet').checked;
+  state.evolve = document.getElementById('evolve').checked;
+  localStorage.setItem('bq_form', JSON.stringify(state));
+}
+function loadFormState() {
+  try {
+    const state = JSON.parse(localStorage.getItem('bq_form'));
+    if (!state) return;
+    Object.keys(state).forEach(k => {
+      const el = document.getElementById(k);
+      if (!el) return;
+      if (typeof state[k] === 'boolean') el.checked = state[k];
+      else el.value = state[k];
+    });
+    if (state.evolve) {
+      document.getElementById('evo-params').style.display = 'block';
+      const evoSection = document.getElementById('evo-section');
+      evoSection.classList.remove('collapsed');
+      evoSection.style.maxHeight = evoSection.scrollHeight + 'px';
+      evoSection.previousElementSibling.classList.remove('collapsed');
+    }
+  } catch(e) {}
+}
+loadFormState();
+
+// Confetti effect
+function launchConfetti() {
+  const canvas = document.getElementById('confetti');
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const pieces = [];
+  const colors = ['#e6c75d','#4ade80','#60a5fa','#a78bfa','#fb923c','#ef4444','#22d3ee'];
+  for (let i = 0; i < 80; i++) {
+    pieces.push({
+      x: Math.random() * canvas.width,
+      y: -20 - Math.random() * 200,
+      w: 3 + Math.random() * 4,
+      h: 3 + Math.random() * 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      vx: (Math.random() - 0.5) * 3,
+      vy: 1.5 + Math.random() * 3,
+      rot: Math.random() * 360,
+      rv: (Math.random() - 0.5) * 8,
+    });
+  }
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    pieces.forEach(p => {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.04;
+      p.rot += p.rv;
+      if (p.y < canvas.height + 20) alive = true;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+    });
+    frame++;
+    if (alive && frame < 180) requestAnimationFrame(draw);
+    else { canvas.style.display = 'none'; ctx.clearRect(0, 0, canvas.width, canvas.height); }
+  }
+  draw();
+}
+
 let currentJobId = null;
 let pollInterval = null;
+let questAborted = false;
 
 const PHASE_ORDER = ['searching', 'fetching', 'backtesting', 'ranking', 'complete'];
 
@@ -1406,10 +1657,23 @@ function updatePhaseStepper(status) {
   });
 }
 
+function cancelQuest() {
+  questAborted = true;
+  if (pollInterval) clearInterval(pollInterval);
+  document.getElementById('statusSpinner').style.display = 'none';
+  document.getElementById('runBtn').disabled = false;
+  document.getElementById('runBtn').innerHTML = '&#x2694;&#xFE0F; BEGIN QUEST &#x2694;&#xFE0F;';
+  document.getElementById('cancelBtn').style.display = 'none';
+  document.getElementById('statusText').innerHTML = '&#x26A0;&#xFE0F; Quest aborted by user';
+}
+
 function startQuest() {
+  questAborted = false;
+  saveFormState();
   const btn = document.getElementById('runBtn');
   btn.disabled = true;
   btn.innerHTML = '&#x23F3; QUEST IN PROGRESS...';
+  document.getElementById('cancelBtn').style.display = 'block';
 
   document.getElementById('phaseStepper').style.display = 'flex';
   document.getElementById('statusBar').style.display = 'flex';
@@ -1485,14 +1749,17 @@ function pollStatus() {
     if (data.status === 'complete') {
       clearInterval(pollInterval);
       document.getElementById('statusSpinner').style.display = 'none';
+      document.getElementById('cancelBtn').style.display = 'none';
       document.getElementById('runBtn').disabled = false;
-      document.getElementById('runBtn').innerHTML = '&#x2694;&#xFE0F; BEGIN QUEST &#x2694;&#xFE0F;';
+      document.getElementById('runBtn').innerHTML = '&#x2694;&#xFE0F; NEW QUEST &#x2694;&#xFE0F;';
+      launchConfetti();
       loadResults();
     } else if (data.status === 'error') {
       clearInterval(pollInterval);
       document.getElementById('statusSpinner').style.display = 'none';
+      document.getElementById('cancelBtn').style.display = 'none';
       document.getElementById('runBtn').disabled = false;
-      document.getElementById('runBtn').innerHTML = '&#x2694;&#xFE0F; BEGIN QUEST &#x2694;&#xFE0F;';
+      document.getElementById('runBtn').innerHTML = '&#x2694;&#xFE0F; RETRY QUEST &#x2694;&#xFE0F;';
       statusText.innerHTML = `&#x274C; ${data.error || 'Unknown error'}`;
     }
   });
@@ -1522,23 +1789,28 @@ function renderVictoryBanner(data) {
   if (!best) { banner.innerHTML = ''; return; }
   banner.innerHTML = `
     <div class="victory-banner pixel-border">
-      <div class="banner-title">&#x1F3C6; QUEST COMPLETE</div>
+      <div>
+        <div class="banner-title">&#x1F3C6; QUEST COMPLETE</div>
+        <div style="font-size:8px;color:var(--text-primary);margin-top:4px;">
+          Champion: ${getSprite(best.strategy_name)} ${best.strategy_name} (${best.symbol})
+        </div>
+      </div>
       <div class="victory-stats">
         <div class="victory-stat">
           <div class="val">${total}</div>
-          <div class="lbl">TESTED</div>
+          <div class="lbl">Tested</div>
         </div>
         <div class="victory-stat">
           <div class="val">${passed}</div>
-          <div class="lbl">PASSED</div>
+          <div class="lbl">Passed</div>
         </div>
         <div class="victory-stat">
-          <div class="val">${best.win_rate}%</div>
-          <div class="lbl">BEST WR</div>
+          <div class="val" style="color:var(--accent-green);">+${best.win_rate}%</div>
+          <div class="lbl">Best Win Rate</div>
         </div>
         <div class="victory-stat">
-          <div class="val">${best.max_drawdown_pct}%</div>
-          <div class="lbl">BEST DD</div>
+          <div class="val" style="color:${best.max_drawdown_pct > 15 ? 'var(--accent-red)' : 'var(--accent-green)'};">${best.max_drawdown_pct}%</div>
+          <div class="lbl">Best Drawdown</div>
         </div>
       </div>
     </div>`;
@@ -1570,7 +1842,68 @@ function hpBarClass(pct) {
   return 'low';
 }
 
+function fmtVal(v, suffix='') {
+  if (v === 0 || v === '0' || v === 0.0) return `<span class="zero-val">\u2014</span>`;
+  const s = typeof v === 'number' ? (Number.isInteger(v) ? String(v) : v.toFixed(2)) : String(v);
+  return s + suffix;
+}
+function fmtSigned(v, suffix='%') {
+  if (v === 0) return `<span class="zero-val">\u2014</span>`;
+  const prefix = v > 0 ? '+' : '';
+  return `${prefix}${v}${suffix}`;
+}
+const RANK_MEDALS = ['\u{1F947}', '\u{1F948}', '\u{1F949}'];
+
+function showDetailModal(r) {
+  const pfDisplay = r.profit_factor === 'Inf' ? '\u221E' : r.profit_factor;
+  document.getElementById('modalContainer').innerHTML = `
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal-box pixel-border">
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <div class="modal-title">${getSprite(r.strategy_name)} ${r.strategy_name} ${getTypeBadge(r.strategy_name)}</div>
+        <div class="modal-section">
+          <h4>Trading Summary &mdash; ${r.symbol}</h4>
+          <div class="modal-stat-grid">
+            <div class="modal-stat"><div class="ms-label">Initial Capital</div><div class="ms-value">$${r.initial_capital.toLocaleString()}</div></div>
+            <div class="modal-stat"><div class="ms-label">Final Capital</div><div class="ms-value ${r.final_capital >= r.initial_capital ? 'positive' : 'negative'}">$${r.final_capital.toLocaleString()}</div></div>
+            <div class="modal-stat"><div class="ms-label">Total Return</div><div class="ms-value ${r.total_return_pct >= 0 ? 'positive' : 'negative'}">${fmtSigned(r.total_return_pct)}</div></div>
+            <div class="modal-stat"><div class="ms-label">Annualized Return</div><div class="ms-value">${fmtSigned(r.annualized_return_pct)}</div></div>
+            <div class="modal-stat"><div class="ms-label">Win Rate</div><div class="ms-value ${colorClass(r.win_rate,55,45)}">${r.win_rate}%</div></div>
+            <div class="modal-stat"><div class="ms-label">Max Drawdown</div><div class="ms-value ${colorClass(r.max_drawdown_pct,15,25,false)}">${r.max_drawdown_pct}%</div></div>
+          </div>
+        </div>
+        <div class="modal-section">
+          <h4>Risk Metrics</h4>
+          <div class="modal-stat-grid">
+            <div class="modal-stat"><div class="ms-label">Sharpe Ratio</div><div class="ms-value">${r.sharpe_ratio}</div></div>
+            <div class="modal-stat"><div class="ms-label">Sortino Ratio</div><div class="ms-value">${r.sortino_ratio}</div></div>
+            <div class="modal-stat"><div class="ms-label">Calmar Ratio</div><div class="ms-value">${r.calmar_ratio}</div></div>
+            <div class="modal-stat"><div class="ms-label">Profit Factor</div><div class="ms-value">${pfDisplay}</div></div>
+            <div class="modal-stat"><div class="ms-label">Expectancy</div><div class="ms-value">${fmtSigned(r.expectancy)}</div></div>
+            <div class="modal-stat"><div class="ms-label">Max Consec Losses</div><div class="ms-value">${r.max_consecutive_losses}</div></div>
+          </div>
+        </div>
+        <div class="modal-section">
+          <h4>Trade Statistics</h4>
+          <div class="modal-stat-grid">
+            <div class="modal-stat"><div class="ms-label">Total Trades</div><div class="ms-value">${r.total_trades}</div></div>
+            <div class="modal-stat"><div class="ms-label">Winning</div><div class="ms-value positive">${r.winning_trades}</div></div>
+            <div class="modal-stat"><div class="ms-label">Losing</div><div class="ms-value negative">${r.losing_trades}</div></div>
+            <div class="modal-stat"><div class="ms-label">Avg Win</div><div class="ms-value positive">${fmtSigned(r.avg_win_pct)}</div></div>
+            <div class="modal-stat"><div class="ms-label">Avg Loss</div><div class="ms-value negative">${fmtSigned(r.avg_loss_pct)}</div></div>
+            <div class="modal-stat"><div class="ms-label">Avg Holding</div><div class="ms-value">${r.avg_holding_periods} bars</div></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+function closeModal() { document.getElementById('modalContainer').innerHTML = ''; }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+let _topResultsCache = [];
+
 function renderTopResults(results) {
+  _topResultsCache = results;
   const container = document.getElementById('topContent');
   if (!results.length) {
     container.innerHTML = `<div class="empty-state"><div class="icon">&#x1F480;</div><div class="text">No champions emerged</div><div class="subtext">Try relaxing your filter thresholds</div></div>`;
@@ -1583,50 +1916,50 @@ function renderTopResults(results) {
     const borderClass = rank === 1 ? 'pixel-border' : (rank <= 3 ? 'pixel-border-blue' : 'pixel-border-green');
     const wrClass = colorClass(r.win_rate, 55, 45);
     const ddClass = colorClass(r.max_drawdown_pct, 15, 25, false);
-    const retClass = r.total_return_pct >= 0 ? 'positive' : 'negative';
     const pfDisplay = r.profit_factor === 'Inf' ? '&infin;' : r.profit_factor;
     const totalTrades = r.winning_trades + r.losing_trades;
     const winPct = totalTrades > 0 ? (r.winning_trades / totalTrades * 100) : 0;
     const lossPct = totalTrades > 0 ? (r.losing_trades / totalTrades * 100) : 0;
+    const medal = RANK_MEDALS[rank - 1] || '';
 
     html += `
-      <div class="top-card ${borderClass}">
+      <div class="top-card ${borderClass}" onclick="showDetailModal(_topResultsCache[${i}])" style="cursor:pointer;" title="Click for details">
         <div class="top-card-header">
           <div>
-            <span class="top-card-rank">#${rank}</span>
-            <span style="font-size:18px; margin: 0 6px;">${getSprite(r.strategy_name)}</span>
+            ${medal ? `<span class="rank-medal">${medal}</span>` : `<span class="top-card-rank">#${rank}</span>`}
+            <span style="font-size:18px; margin: 0 4px;" aria-hidden="true">${getSprite(r.strategy_name)}</span>
             <span class="top-card-name">${r.strategy_name}</span>
             ${getTypeBadge(r.strategy_name)}
           </div>
           <span class="top-card-symbol">${r.symbol}</span>
         </div>
         ${totalTrades > 0 ? `
-        <div class="wl-bar-container">
+        <div class="wl-bar-container" aria-label="${r.winning_trades} wins, ${r.losing_trades} losses">
           <div class="wl-bar-win" style="width:${winPct}%"></div>
           <div class="wl-bar-loss" style="width:${lossPct}%"></div>
         </div>
         <div class="wl-label">
-          <span class="positive">${r.winning_trades}W</span>
+          <span class="positive">+${r.winning_trades}W</span>
           <span class="negative">${r.losing_trades}L</span>
         </div>` : ''}
         <div class="stat-grid" style="margin-top:8px;">
           <div class="stat-item">
             <div class="stat-label"${tip('Win Rate')}>Win Rate</div>
-            <div class="stat-value ${wrClass}">${r.win_rate}%</div>
+            <div class="stat-value ${wrClass}">${fmtVal(r.win_rate, '%')}</div>
             <div class="hp-bar-container"><div class="hp-bar ${hpBarClass(r.win_rate)}" style="width:${Math.min(r.win_rate, 100)}%"></div></div>
           </div>
           <div class="stat-item">
             <div class="stat-label"${tip('Max Drawdown')}>Max Drawdown</div>
-            <div class="stat-value ${ddClass}">${r.max_drawdown_pct}%</div>
+            <div class="stat-value ${ddClass}">${fmtVal(r.max_drawdown_pct, '%')}</div>
             <div class="hp-bar-container"><div class="hp-bar ${hpBarClass(100 - r.max_drawdown_pct)}" style="width:${Math.min(r.max_drawdown_pct, 100)}%"></div></div>
           </div>
           <div class="stat-item">
             <div class="stat-label"${tip('Total Return')}>Total Return</div>
-            <div class="stat-value ${retClass}">${r.total_return_pct}%</div>
+            <div class="stat-value">${fmtSigned(r.total_return_pct)}</div>
           </div>
           <div class="stat-item">
             <div class="stat-label"${tip('Sharpe Ratio')}>Sharpe Ratio</div>
-            <div class="stat-value ${colorClass(r.sharpe_ratio, 1, 0)}">${r.sharpe_ratio}</div>
+            <div class="stat-value ${colorClass(r.sharpe_ratio, 1, 0)}">${fmtVal(r.sharpe_ratio)}</div>
           </div>
           <div class="stat-item">
             <div class="stat-label"${tip('Profit Factor')}>Profit Factor</div>
@@ -1635,30 +1968,6 @@ function renderTopResults(results) {
           <div class="stat-item">
             <div class="stat-label"${tip('Total Trades')}>Total Trades</div>
             <div class="stat-value">${r.total_trades}</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label"${tip('Avg Win')}>Avg Win</div>
-            <div class="stat-value positive">${r.avg_win_pct}%</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label"${tip('Avg Loss')}>Avg Loss</div>
-            <div class="stat-value negative">${r.avg_loss_pct}%</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label"${tip('Calmar')}>Calmar</div>
-            <div class="stat-value">${r.calmar_ratio}</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label"${tip('Expectancy')}>Expectancy</div>
-            <div class="stat-value ${r.expectancy >= 0 ? 'positive' : 'negative'}">${r.expectancy}%</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label"${tip('Holding Period')}>Holding Period</div>
-            <div class="stat-value">${r.avg_holding_periods} bars</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-label"${tip('Max Consec Loss')}>Max Consec Loss</div>
-            <div class="stat-value">${r.max_consecutive_losses}</div>
           </div>
         </div>
       </div>`;
@@ -1670,13 +1979,39 @@ let allResultsData = [];
 let allResultsConfig = {};
 let allResultsFilteredCount = 0;
 let currentSort = { col: null, asc: true };
+let tableFilterType = 'all';
+let tableFilterSymbol = 'all';
 
 function renderAllResults(results, filteredCount, config) {
   allResultsData = results;
   allResultsConfig = config;
   allResultsFilteredCount = filteredCount;
   currentSort = { col: null, asc: true };
+  tableFilterType = 'all';
+  tableFilterSymbol = 'all';
   renderAllTable();
+}
+
+function exportCSV() {
+  const headers = ['Strategy','Symbol','Trades','Win Rate %','Max DD %','Return %','Sharpe','Profit Factor','Avg Win %','Avg Loss %','Calmar','Expectancy %'];
+  const rows = allResultsData.map(r => [
+    r.strategy_name, r.symbol, r.total_trades, r.win_rate, r.max_drawdown_pct,
+    r.total_return_pct, r.sharpe_ratio, r.profit_factor === 'Inf' ? 'Inf' : r.profit_factor,
+    r.avg_win_pct, r.avg_loss_pct, r.calmar_ratio, r.expectancy
+  ]);
+  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const blob = new Blob([csv], {type: 'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'backtester_results.csv';
+  a.click();
+}
+
+function getStrategyType(name) {
+  for (const [key, type] of Object.entries(STRATEGY_TYPES)) {
+    if (name.toLowerCase().includes(key.toLowerCase().split(' ')[0].toLowerCase())) return type;
+  }
+  return 'unknown';
 }
 
 function renderAllTable() {
@@ -1688,9 +2023,12 @@ function renderAllTable() {
     return;
   }
 
-  const sorted = [...results];
+  let filtered = [...results];
+  if (tableFilterType !== 'all') filtered = filtered.filter(r => getStrategyType(r.strategy_name) === tableFilterType);
+  if (tableFilterSymbol !== 'all') filtered = filtered.filter(r => r.symbol === tableFilterSymbol);
+
   if (currentSort.col !== null) {
-    sorted.sort((a, b) => {
+    filtered.sort((a, b) => {
       let va = a[currentSort.col], vb = b[currentSort.col];
       if (va === 'Inf') va = 1e9;
       if (vb === 'Inf') vb = 1e9;
@@ -1701,6 +2039,7 @@ function renderAllTable() {
     });
   }
 
+  const symbols = [...new Set(results.map(r => r.symbol))];
   const cols = [
     { key: null, label: '#' },
     { key: 'strategy_name', label: 'Strategy' },
@@ -1711,18 +2050,32 @@ function renderAllTable() {
     { key: 'total_return_pct', label: 'Return' },
     { key: 'sharpe_ratio', label: 'Sharpe' },
     { key: 'profit_factor', label: 'P.Factor' },
-    { key: 'avg_win_pct', label: 'Avg Win' },
-    { key: 'avg_loss_pct', label: 'Avg Loss' },
-    { key: 'calmar_ratio', label: 'Calmar' },
     { key: 'expectancy', label: 'Expect.' },
   ];
 
   let html = `<div style="margin-bottom:10px;font-size:8px;color:var(--accent-cyan);">
     ${allResultsFilteredCount}/${results.length} strategies passed filters
     (WR &ge; ${config.min_win_rate || 50}%, DD &le; ${config.max_drawdown || 25}%)
+    &bull; Showing ${filtered.length} of ${results.length}
   </div>`;
 
-  html += `<div class="table-scroll"><table class="results-table">
+  html += `<div class="filter-toolbar">
+    <span class="filter-label">Filter:</span>
+    <select onchange="tableFilterType=this.value;renderAllTable()" aria-label="Filter by type">
+      <option value="all">All Types</option>
+      <option value="trend"${tableFilterType==='trend'?' selected':''}>Trend</option>
+      <option value="reversion"${tableFilterType==='reversion'?' selected':''}>Reversion</option>
+      <option value="momentum"${tableFilterType==='momentum'?' selected':''}>Momentum</option>
+      <option value="volatility"${tableFilterType==='volatility'?' selected':''}>Volatility</option>
+    </select>
+    <select onchange="tableFilterSymbol=this.value;renderAllTable()" aria-label="Filter by symbol">
+      <option value="all">All Symbols</option>
+      ${symbols.map(s => `<option value="${s}"${tableFilterSymbol===s?' selected':''}>${s}</option>`).join('')}
+    </select>
+    <button onclick="exportCSV()" title="Download results as CSV">&#x1F4E5; Export CSV</button>
+  </div>`;
+
+  html += `<div class="table-scroll"><table class="results-table" role="table">
     <thead><tr>`;
 
   cols.forEach(c => {
@@ -1730,31 +2083,27 @@ function renderAllTable() {
     const arrow = c.key ? `<span class="sort-arrow">${isSorted ? (currentSort.asc ? '\u25B2' : '\u25BC') : '\u25B2'}</span>` : '';
     const cls = isSorted ? ' class="sorted"' : '';
     const onclick = c.key ? ` onclick="sortAllResults('${c.key}')"` : '';
-    html += `<th${cls}${onclick}>${c.label}${arrow}</th>`;
+    html += `<th${cls}${onclick} scope="col">${c.label}${arrow}</th>`;
   });
 
   html += `</tr></thead><tbody>`;
 
-  sorted.forEach((r, i) => {
+  filtered.forEach((r, i) => {
     const wrClass = colorClass(r.win_rate, 55, 45);
     const ddClass = colorClass(r.max_drawdown_pct, 15, 25, false);
-    const retClass = r.total_return_pct >= 0 ? 'positive' : 'negative';
     const pfDisplay = r.profit_factor === 'Inf' ? '&infin;' : r.profit_factor;
 
-    html += `<tr>
+    html += `<tr onclick="showDetailModal(allResultsData[allResultsData.indexOf(allResultsData.find(x=>x.strategy_name==='${r.strategy_name.replace(/'/g,"\\'")}' && x.symbol==='${r.symbol}'))])" style="cursor:pointer;" title="Click for details">
       <td>${i+1}</td>
       <td>${getSprite(r.strategy_name)} ${r.strategy_name} ${getTypeBadge(r.strategy_name)}</td>
       <td>${r.symbol}</td>
-      <td>${r.total_trades}</td>
-      <td class="${wrClass}">${r.win_rate}%</td>
-      <td class="${ddClass}">${r.max_drawdown_pct}%</td>
-      <td class="${retClass}">${r.total_return_pct}%</td>
-      <td class="${colorClass(r.sharpe_ratio, 1, 0)}">${r.sharpe_ratio}</td>
+      <td>${r.total_trades || '<span class="zero-val">\u2014</span>'}</td>
+      <td class="${wrClass}">${fmtVal(r.win_rate, '%')}</td>
+      <td class="${ddClass}">${fmtVal(r.max_drawdown_pct, '%')}</td>
+      <td>${fmtSigned(r.total_return_pct)}</td>
+      <td class="${colorClass(r.sharpe_ratio, 1, 0)}">${fmtVal(r.sharpe_ratio)}</td>
       <td>${pfDisplay}</td>
-      <td class="positive">${r.avg_win_pct}%</td>
-      <td class="negative">${r.avg_loss_pct}%</td>
-      <td>${r.calmar_ratio}</td>
-      <td class="${r.expectancy >= 0 ? 'positive' : 'negative'}">${r.expectancy}%</td>
+      <td>${fmtSigned(r.expectancy)}</td>
     </tr>`;
   });
 
