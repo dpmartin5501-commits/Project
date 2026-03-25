@@ -8,11 +8,19 @@ Backtester is a Python CLI application for searching and backtesting cryptocurre
 
 ### Running the application
 
+**CLI mode:**
 ```bash
 python3 -m backtester --no-search --days 30
 ```
 
 The `--no-search` flag skips internet strategy search (DuckDuckGo scraping) and uses only built-in strategies. This is the recommended flag for development/testing since the web scraping can be flaky.
+
+**Web GUI mode:**
+```bash
+python3 -m backtester --gui --port 5000
+```
+
+Launches a pixel-art RPG themed web interface at `http://localhost:5000`. The GUI supports all engine features (exchange selection, filters, genetic evolution) with async job processing.
 
 See `README.md` for full CLI options.
 
