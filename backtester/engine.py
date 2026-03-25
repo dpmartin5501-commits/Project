@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from .backtester import BacktestResult, Backtester
 from .data_fetcher import DataFetcher, FetchConfig
@@ -158,6 +158,7 @@ class BacktesterEngine:
         backtester = Backtester(
             initial_capital=self.config.initial_capital,
             commission_pct=self.config.commission_pct,
+            timeframe=self.config.timeframe,
         )
 
         console.print(f"[cyan]Running {len(strategies)} strategies across {len(data)} symbols...[/cyan]")
@@ -199,6 +200,7 @@ class BacktesterEngine:
             data,
             initial_capital=self.config.initial_capital,
             commission_pct=self.config.commission_pct,
+            timeframe=self.config.timeframe,
             on_progress=on_progress,
         )
         improved = sum(1 for r in results if r.improved)
